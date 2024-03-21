@@ -2,7 +2,7 @@ import React from "react"
 import { HeaderWrapper } from "./styled"
 
 
-const HomePage: React.FC = () => {
+const Header: React.FC = () => {
   return (
     <HeaderWrapper>
       <h1>«BILLIARD»</h1>
@@ -10,4 +10,4 @@ const HomePage: React.FC = () => {
   )
 }
 
-export default HomePage
+export default Header

@@ -1,8 +1,18 @@
-import HomePage from "./pages/HomePage/HomePage"
+import Header from "./pages/Header/Header"
+import Footer from "./pages/Footer/Footer"
+import Main from "./pages/Main/Main"
+import { AppStyles } from './App.styled'
 
 const App = () => {
-  return (
-    <HomePage />
+  return (<>
+    <AppStyles />
+
+    <Header />
+
+    <Main />
+
+    <Footer />
+  </>
   )
 }
 
