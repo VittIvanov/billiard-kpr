@@ -69,7 +69,15 @@ export const AppStyles = createGlobalStyle`
   }
 `
 
-export const PageWrapper = styled.div`
-padding: 20px;
+export const InnerPageWrapper = styled.div`
 min-height: calc(100vh - ${HEADER_HEIGHT}px - ${FOOTER_HEIGHT})px;
+height: 100%;
+margin: 0;
+
+`
+
+export const PageContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
 `
