@@ -1,50 +1,71 @@
 import { TableWrapper } from "./styled";
-import React, { useState, useRef, MouseEventHandler } from 'react';
+import React, { useState, useRef, useEffect, MouseEventHandler } from 'react';
+import { drawBalls } from "../../drawBalls/drawBalls";
 import { balls as ballData, Ball } from "../../ballsdata/ballsdata";
 import useCanvasEffect from "../../canvasEffect/useCanvasEffect";
-import useBallMovement from "../../ballMovement/useBallMovement";
+import { useMouseDrag } from "../../handler/handler";
+
+
+
+// Функция для изменения положения ударенного шара
+const moveHitBall = (ball: Ball, directionVector: { x: number, y: number }) => {
+  // Вычисляем новые координаты шара, добавляя значения из directionVector
+  ball.x += directionVector.x;
+  ball.y += directionVector.y;
+};
 
 const BilliardTable: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [balls, setBalls] = useState<Ball[]>([]);
-  const [startPos, setStartPos] = useState<{ x: number; y: number } | null>(null);
-  const [endPos, setEndPos] = useState<{ x: number; y: number } | null>(null);
+  const { handleMouseDown, handleMouseUp, directionVector } = useMouseDrag();
+  const [animationFrameId, setAnimationFrameId] = useState<number | null>(null); // Хранит ID текущего кадра анимации
 
+  // Обработчик для обновления позиций шаров и перерисовки холста
+  // Обработчик для обновления позиций шаров и перерисовки холста
+  const updateCanvas = () => {
+    console.log("Updating canvas"); // Добавляем отладочный вывод
 
-  useBallMovement({ startPos, endPos, balls, setBalls });
+    // Если есть направление удара, перемещаем ударенный шар
+    if (directionVector && ballData.length > 0) {
+      moveHitBall(ballData[0], directionVector);
+    }
 
-  const drawBalls = (ctx: CanvasRenderingContext2D) => {
-    ballData.forEach((ball: Ball) => {
-      ctx.beginPath();
-      ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-      ctx.fillStyle = ball.color;
-      ctx.fill();
-      ctx.closePath();
+    // Получаем контекст холста
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Очищаем холст
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Обновляем позиции шаров и отрисовываем их
+    ballData.forEach(ball => {
+      // Добавляем скорость к позициям шара
+      ball.x += 5 * directionVector.x;
+      ball.y += 5 * directionVector.y;
+      // Отрисовываем шар
+      drawBalls(ctx, [ball]);
     });
+
+    // Запрашиваем следующий кадр анимации
+    setAnimationFrameId(requestAnimationFrame(updateCanvas));
   };
 
-  const handleMouseDown: MouseEventHandler<HTMLCanvasElement> = (event) => {
-    const startX = event.clientX;
-    const startY = event.clientY;
-    setStartPos({ x: startX, y: startY });
-  };
 
-  const handleMouseMove: MouseEventHandler<HTMLCanvasElement> = (event) => {
-    // Тут можно обработать движение мыши во время толчка, если нужно
-  };
+  // Эффект для запуска анимации при монтировании компонента
+  useEffect(() => {
+    // Начинаем анимацию
+    setAnimationFrameId(requestAnimationFrame(updateCanvas));
 
-  const handleMouseUp: MouseEventHandler<HTMLCanvasElement> = (event) => {
-    const endX = event.clientX;
-    const endY = event.clientY;
-    setEndPos({ x: endX, y: endY });
-  };
+    // Очищаем кадр анимации при размонтировании компонента
+    return () => {
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+    };
+  }, []); // Зависимости пусты, так как эффект должен выполниться только один раз при монтировании
 
   useCanvasEffect({
     canvasRef,
-    drawFunction: (ctx) => drawBalls(ctx),
-    handleMouseDown,
-    handleMouseMove,
-    handleMouseUp,
+    drawFunction: (ctx) => drawBalls(ctx, ballData)
   });
 
   return (
@@ -53,7 +74,6 @@ const BilliardTable: React.FC = () => {
         ref={canvasRef}
         style={{ width: '100%', height: '100%', border: '1px solid black' }}
         onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
       />
     </TableWrapper>

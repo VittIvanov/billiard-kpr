@@ -70,8 +70,8 @@ export const AppStyles = createGlobalStyle`
 `
 
 export const InnerPageWrapper = styled.div`
-min-height: calc(100vh - ${HEADER_HEIGHT}px - ${FOOTER_HEIGHT})px;
 height: 100%;
+height: calc(100vh - ${HEADER_HEIGHT}px - ${FOOTER_HEIGHT})px;
 margin: 0;
 
 `
